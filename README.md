@@ -1,10 +1,10 @@
-# ✈️ Airfare Forecast & Anomaly Detection using Time Series Forecasting
+# Airfare Forecast & Anomaly Detection using Time Series Forecasting
 
 This Streamlit project focuses on forecasting flight fares and detecting unusual price patterns. It leverages Python-based time series modeling with **SARIMAX**, applies **z-score-based anomaly detection**, and visualizes results in an interactive web app.
 
 ---
 
-## 📌 Problem Statement
+## Problem Statement
 
 Can we build an interactive system to:
 - Forecast flight ticket prices using historical trends?
@@ -13,7 +13,7 @@ Can we build an interactive system to:
 
 ---
 
-## 🧾 Dataset
+## Dataset
 
 - **Source**: Cleaned dataset containing fields like `Date_of_Journey`, `Source`, `Destination`, `Price`, `Class`, etc.
 - Focused only on **Economy class** fares for simplicity and consistency.
@@ -26,7 +26,7 @@ Sample Preprocessing:
 
 ---
 
-## 🔧 Preprocessing & Modeling Steps
+## Preprocessing & Modeling Steps
 
 ### 1. Preprocessing
 - Converted journey date to datetime
@@ -44,7 +44,7 @@ Sample Preprocessing:
 
 ---
 
-## 🖥️ Features of the Streamlit App
+## Features of the Streamlit App
 
 - Route and date filters in sidebar
 - Forecast chart with historical vs predicted prices
@@ -54,7 +54,7 @@ Sample Preprocessing:
 
 ---
 
-## 💡 What I Learned
+## What I Learned
 
 - How to structure time series problems for real-world datasets
 - Implementing SARIMAX for multi-seasonality and trend forecasting
@@ -64,7 +64,7 @@ Sample Preprocessing:
 
 ---
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 - Add more advanced models (e.g., Prophet, LSTM)
 - Include additional features like holidays or booking time window
@@ -75,7 +75,7 @@ Sample Preprocessing:
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Python** (pandas, numpy, statsmodels, plotly, streamlit)
 - **Time Series Modeling**: SARIMAX
@@ -84,7 +84,7 @@ Sample Preprocessing:
 
 ---
 
-## ▶️ How to Run This Project
+## How to Run This Project
 
 ```bash
 # 1. Clone the repo
