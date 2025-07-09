@@ -2,6 +2,8 @@
 
 This Streamlit project focuses on forecasting flight fares and detecting unusual price patterns. It leverages Python-based time series modeling with **SARIMAX**, applies **z-score-based anomaly detection**, and visualizes results in an interactive web app.
 
+Link to the app - https://airfareforecasting.streamlit.app/
+
 ---
 
 ## Problem Statement
