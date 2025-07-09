@@ -20,7 +20,7 @@ def load_data(csv_path: Path):
     df = df[df["Class"].str.lower() == "economy"].copy()     # optional filter
     return df
 
-DATA = load_data(Path("data") / "Cleaned_dataset.csv")
+DATA = load_data(Path("Data") / "Cleaned_dataset.csv")
 
 
 # 2 · SIDEBAR CONTROLS
