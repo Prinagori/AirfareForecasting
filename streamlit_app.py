@@ -8,9 +8,8 @@ from warnings import filterwarnings
 
 filterwarnings("ignore")
 
-# ──────────────────────────────────────────────────────────────
 # 1 · PAGE CONFIG & DATA LOADER (cached)
-# ──────────────────────────────────────────────────────────────
+
 st.set_page_config("Airfare Forecast & Anomaly Detector", layout="wide", page_icon="✈️")
 
 @st.cache_data(show_spinner=False)
@@ -23,18 +22,17 @@ def load_data(csv_path: Path):
 
 DATA = load_data(Path("data") / "Cleaned_dataset.csv")
 
-# ──────────────────────────────────────────────────────────────
+
 # 2 · SIDEBAR CONTROLS
-# ──────────────────────────────────────────────────────────────
+
 st.sidebar.header("⚙️ Controls")
 routes          = sorted(DATA["Route"].unique())
 chosen_route    = st.sidebar.selectbox("Route", routes)
 forecast_h      = st.sidebar.number_input("Forecast horizon (days)", 7, 90, 30)
 anomaly_sigma   = st.sidebar.slider("Anomaly threshold (σ)", 1.0, 4.0, 2.5, 0.1)
 
-# ──────────────────────────────────────────────────────────────
 # 3 · TIME-SERIES PREP
-# ──────────────────────────────────────────────────────────────
+
 df_route = (DATA[DATA["Route"] == chosen_route]
             .groupby("Date_of_journey", as_index=False)["Fare"]
             .mean()
@@ -52,9 +50,9 @@ if df_route["y"].nunique() <= 1 or len(df_route) < 20:
     st.warning("Not enough variance or too few points to forecast this route.")
     st.stop()
 
-# ──────────────────────────────────────────────────────────────
+
 # 4 · SARIMAX FORECAST
-# ──────────────────────────────────────────────────────────────
+
 # Simple seasonal (weekly) SARIMAX(1,1,1)(1,1,1,7)
 model   = SARIMAX(df_route["y"], order=(1,1,1), seasonal_order=(1,1,1,7))
 results = model.fit(disp=False)
@@ -76,20 +74,37 @@ merged = pd.concat([
     forecast_df.assign(y=np.nan)
 ]).reset_index(drop=True)
 
-# ──────────────────────────────────────────────────────────────
-# 5 · ANOMALY DETECTION (z-score on residuals of historical part)
-# ──────────────────────────────────────────────────────────────
-hist = merged.dropna(subset=["y"])
-res = hist["y"].reset_index(drop=True) - results.fittedvalues.reset_index(drop=True)
-sigma = res.std()
-hist["z_score"]  = res / sigma
-hist["anomaly"]  = hist["z_score"].abs() > anomaly_sigma
 
+# 5 · ANOMALY DETECTION (z-score on residuals of historical part)
+
+# Drop rows with missing actual values
+hist = merged.dropna(subset=["y"]).copy()
+
+# Compute residuals between actual values and SARIMAX fitted values
+residuals = hist["y"].reset_index(drop=True) - results.fittedvalues.reset_index(drop=True)
+
+# Compute standard deviation of residuals
+sigma = residuals.std()
+
+# Compute z-score of residuals
+hist["z_score"] = residuals / sigma
+
+# Set number of initial points to skip (to avoid false anomalies)
+skip_initial = 7
+anomaly_threshold = anomaly_sigma  # keep your existing threshold (e.g., 2)
+
+# Initialize anomaly column as False
+hist["anomaly"] = False
+
+# Flag anomalies only after skipping initial rows
+hist.loc[skip_initial:, "anomaly"] = hist.loc[skip_initial:, "z_score"].abs() > anomaly_threshold
+
+# Merge the z_score and anomaly columns back into the full dataset
 merged = merged.merge(hist[["ds", "z_score", "anomaly"]], on="ds", how="left")
 
-# ──────────────────────────────────────────────────────────────
+
+
 # 6 · PLOT
-# ──────────────────────────────────────────────────────────────
 fig = go.Figure()
 
 fig.add_trace(go.Scatter(x=merged["ds"], y=merged["y"],
@@ -120,9 +135,9 @@ fig.update_layout(title=f"Average Economy Fare · {chosen_route}",
                   legend=dict(orientation="h", yanchor="bottom", y=1.02,
                               xanchor="right", x=1))
 
-# ──────────────────────────────────────────────────────────────
+
 # 7 · STREAMLIT UI
-# ──────────────────────────────────────────────────────────────
+
 st.title("✈️ Airfare Price Forecast & Anomaly Detector")
 
 st.markdown(f"""
